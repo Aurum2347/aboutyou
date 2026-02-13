@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О тебе — демонстрация данных</title>
+    <!-- Font Awesome для иконок (глаз и др.) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0b0e14;
+            color: #eef2f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Заменяем шрифт Inter через fallback */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Заголовок */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #b5c9f0, #8f9bb5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subhead {
+            color: #8f9bb5;
+            font-size: 1rem;
+        }
+
+        /* Сетка карточек */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Карточка */
+        .card {
+            background: rgba(20, 24, 33, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #2c3240;
+            border-radius: 28px;
+            padding: 1.5rem 1.2rem;
+            box-shadow: 0 15px 30px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #4f5a6b;
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin-bottom: 1.2rem;
+            color: #b5c9f0;
+            font-size: 1.1rem;
+            border-bottom: 1px dashed #2f3542;
+            padding-bottom: 0.6rem;
+        }
+
+        .card-header i {
+            font-size: 1.3rem;
+            width: 1.8rem;
+            color: #7f8fa6;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #262c38;
+            font-size: 0.95rem;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: #a6b3cc;
+            font-weight: 400;
+        }
+
+        .data-value {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: #0f131c;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #d6e2ff;
+        }
+
+        .hidden-value {
+            filter: blur(5px);
+            background: #2a2f3b;
+            transition: filter 0.1s;
+            cursor: pointer;
+        }
+
+        /* Кнопка-глаз */
+        .eye-btn {
+            background: none;
+            border: none;
+            color: #6b7c93;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 30px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .eye-btn:hover {
+            color: #dce7ff;
+            background: #2d3440;
+        }
+
+        /* Кнопка запроса разрешения (геолокация/камера) */
+        .action-btn {
+            background: #2c3442;
+            border: none;
+            color: #e1e9fc;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: #3d4759;
+        }
+
+        /* Блок с камерой */
+        .camera-list {
+            list-style: none;
+            margin-top: 0.6rem;
+        }
+
+        .camera-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #cbd5e8;
+            padding: 0.2rem 0;
+        }
+
+        .camera-item i {
+            color: #5f7c9a;
+            width: 1.2rem;
+        }
+
+        /* Футер */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #6a738b;
+            font-size: 0.85rem;
+            border-top: 1px solid #252b36;
+            padding-top: 1.8rem;
+        }
+
+        footer a {
+            color: #98a9c7;
+            text-decoration: none;
+            border-bottom: 1px dotted #3f4a5a;
+        }
+
+        footer a:hover {
+            color: #c0d0f0;
+        }
+
+        /* Маленький вспомогательный текст */
+        .note {
+            color: #5f6c84;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Адаптация */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>⌾ о тебе</h1>
+        <div class="subhead">информация, доступная сайту при посещении</div>
+    </header>
+
+    <!-- Карточки с данными -->
+    <div class="grid">
+        <!-- IP и местоположение (по IP) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-globe"></i> <span>Сеть & местоположение</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label"><i class="fas fa-ip" style="width:1.2rem;"></i> IP-адрес</span>
+                <span class="data-value" id="ip-value">••••••</span>
+                <button class="eye-btn" onclick="toggleVisibility('ip-value', 'ip-original')"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="data-row">
+                <span class="data-label"><i class="fas fa-map-pin"></i> Город / страна</span>
+                <span class="data-value" id="location-value">••••••</span>
+                <button class="eye-btn" onclick="toggleVisibility('location-value', 'loc-original')"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="data-row">
+                <span class="data-label"><i class="fas fa-location-dot"></i> Координаты (точно)</span>
+                <span class="data-value" id="geo-value">—</span>
+                <button class="eye-btn" onclick="toggleVisibility('geo-value', 'geo-original')"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="note" id="geo-note">геолокация не запрошена</div>
+        </div>
+
+        <!-- Камера и устройства -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-camera"></i> <span>Камера / микрофон</span>
+            </div>
+            <div id="camera-section">
+                <div class="data-row">
+                    <span class="data-label">Доступ к камере</span>
+                    <span class="data-value" id="cam-permission">неизвестно</span>
+                    <button class="eye-btn" onclick="toggleVisibility('cam-permission', 'cam-original')"><i class="far fa-eye"></i></button>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Устройства</span>
+                    <span class="data-value" id="cam-devices">—</span>
+                    <button class="eye-btn" onclick="toggleVisibility('cam-devices', 'dev-original')"><i class="far fa-eye"></i></button>
+                </div>
+                <button class="action-btn" id="request-cam-btn" onclick="requestCameraAccess()">🔗 запросить доступ</button>
+            </div>
+            <div class="note" id="cam-note">доступ нужен для получения списка камер</div>
+        </div>
+
+        <!-- Системная информация -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-laptop"></i> <span>Система / браузер</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">ОС / платформа</span>
+                <span class="data-value" id="os-value">••••••</span>
+                <button class="eye-btn" onclick="toggleVisibility('os-value', 'os-original')"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Браузер</span>
+                <span class="data-value" id="browser-value">••••••</span>
+                <button class="eye-btn" onclick="toggleVisibility('browser-value', 'browser-original')"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Экран</span>
+                <span class="data-value" id="screen-value">••••••</span>
+                <button class="eye-btn" onclick="toggleVisibility('screen-value', 'screen-original')"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Язык / часовой пояс</span>
+                <span class="data-value" id="locale-value">••••••</span>
+                <button class="eye-btn" onclick="toggleVisibility('locale-value', 'locale-original')"><i class="far fa-eye"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подвал с дисклеймером -->
+    <footer>
+        <p>⚖️ Сайт написан в обозревательных целях и не несёт никакого вреда. Все данные остаются на вашем устройстве.</p>
+        <p>📂 Открытый исходный код: <a href="https://github.com/Aurum2347/aboutyou" target="_blank" rel="noopener">github.com/Aurum2347/aboutyou</a></p>
+    </footer>
+</div>
+
+<script>
+    // ---------------------------
+    // Глобальные переменные для хранения оригинальных значений (для переключения видимости)
+    // ---------------------------
+    let ipOriginal = '';
+    let locationOriginal = '';
+    let geoOriginal = '';
+    let camPermissionOriginal = '';
+    let camDevicesOriginal = '';
+    let osOriginal = '';
+    let browserOriginal = '';
+    let screenOriginal = '';
+    let localeOriginal = '';
+
+    // ---------------------------
+    // Переключение видимости (глазик)
+    // ---------------------------
+    window.toggleVisibility = function(valueElementId, originalKey) {
+        const valueEl = document.getElementById(valueElementId);
+        const eyeBtn = valueEl.nextElementSibling; // кнопка рядом
+        const icon = eyeBtn.querySelector('i');
+
+        // Получаем оригинальное значение из глобальной переменной (здесь используется оригинальное хранилище,
+        // но можно и из data-атрибута. Для простоты будем брать из переменной, а в элементе хранить показанное/скрытое)
+        let original;
+        switch (originalKey) {
+            case 'ip-original': original = ipOriginal; break;
+            case 'loc-original': original = locationOriginal; break;
+            case 'geo-original': original = geoOriginal; break;
+            case 'cam-original': original = camPermissionOriginal; break;
+            case 'dev-original': original = camDevicesOriginal; break;
+            case 'os-original': original = osOriginal; break;
+            case 'browser-original': original = browserOriginal; break;
+            case 'screen-original': original = screenOriginal; break;
+            case 'locale-original': original = localeOriginal; break;
+            default: return;
+        }
+
+        // Если текущий текст === '••••••' или содержит звездочки (скрыто) — показываем оригинал
+        if (valueEl.innerText === '••••••' || valueEl.innerText === '—' || valueEl.innerText.includes('*')) {
+            if (original && original !== 'неизвестно' && original !== '—' && original !== 'не получено') {
+                valueEl.innerText = original;
+                icon.className = 'far fa-eye-slash';
+            } else {
+                // Если оригинала нет, ничего не делаем, или показываем что есть
+                if (original) valueEl.innerText = original;
+                icon.className = 'far fa-eye-slash';
+            }
+        } else {
+            // Скрываем
+            valueEl.innerText = '••••••';
+            icon.className = 'far fa-eye';
+        }
+    };
+
+    // ---------------------------
+    // Функции получения данных
+    // ---------------------------
+
+    // Получение IP и местоположения через ipapi.co (без ключа)
+    async function fetchIPAndLocation() {
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            // IP
+            ipOriginal = data.ip || 'не определено';
+            document.getElementById('ip-value').innerText = '••••••';
+            // Город / страна
+            locationOriginal = `${data.city || '?'}, ${data.country_name || '?'}`;
+            document.getElementById('location-value').innerText = '••••••';
+
+            // Координаты (по IP — приблизительные)
+            if (data.latitude && data.longitude) {
+                geoOriginal = `${data.latitude.toFixed(3)}, ${data.longitude.toFixed(3)} (по IP)`;
+            } else {
+                geoOriginal = 'недоступно';
+            }
+            document.getElementById('geo-value').innerText = '••••••';
+        } catch (err) {
+            console.warn('Не удалось получить IP/локацию:', err);
+            ipOriginal = 'ошибка запроса';
+            locationOriginal = 'ошибка';
+            geoOriginal = 'ошибка';
+            document.getElementById('ip-value').innerText = '••••••';
+            document.getElementById('location-value').innerText = '••••••';
+            document.getElementById('geo-value').innerText = '••••••';
+        }
+    }
+
+    // Запрос точной геолокации (GPS)
+    function requestGeolocation() {
+        if (!navigator.geolocation) {
+            document.getElementById('geo-note').innerText = 'геолокация не поддерживается';
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                geoOriginal = `${latitude.toFixed(5)}, ${longitude.toFixed(5)} (точная)`;
+                document.getElementById('geo-value').innerText = '••••••';
+                document.getElementById('geo-note').innerHTML = '✅ точные координаты получены';
+                // Обновим кнопку-глаз (данные уже в переменной)
+            },
+            (error) => {
+                console.warn('Геолокация отклонена или ошибка:', error);
+                document.getElementById('geo-note').innerHTML = '❌ доступ запрещён';
+                if (geoOriginal === '' || geoOriginal.includes('(по IP)')) {
+                    // оставляем приблизительную, если есть
+                } else {
+                    geoOriginal = 'отказано';
+                }
+            }
+        );
+    }
+
+    // Запрос доступа к камере и получение списка устройств
+    async function requestCameraAccess() {
+        const camPermissionEl = document.getElementById('cam-permission');
+        const camDevicesEl = document.getElementById('cam-devices');
+        const camNote = document.getElementById('cam-note');
+
+        try {
+            // Запрашиваем доступ к видео (без звука)
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            camPermissionOriginal = '✅ разрешено';
+            camPermissionEl.innerText = '••••••';
+            camNote.innerHTML = 'доступ предоставлен';
+
+            // Получаем список устройств
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoInputs = devices.filter(dev => dev.kind === 'videoinput');
+            if (videoInputs.length > 0) {
+                camDevicesOriginal = videoInputs.map(d => d.label || 'Камера').join('; ');
+            } else {
+                camDevicesOriginal = 'нет видеокамер';
+            }
+            camDevicesEl.innerText = '••••••';
+
+            // Закрываем поток (освобождаем камеру)
+            stream.getTracks().forEach(track => track.stop());
+        } catch (err) {
+            console.warn('Ошибка доступа к камере:', err);
+            camPermissionOriginal = '❌ запрещено';
+            camDevicesOriginal = 'недоступно';
+            camPermissionEl.innerText = '••••••';
+            camDevicesEl.innerText = '••••••';
+            camNote.innerHTML = 'пользователь отклонил запрос';
+        }
+    }
+
+    // Сбор системной информации
+    function gatherSystemInfo() {
+        // ОС: определяем по userAgent
+        const ua = navigator.userAgent;
+        let os = 'неизвестно';
+        if (ua.indexOf('Win') !== -1) os = 'Windows';
+        else if (ua.indexOf('Mac') !== -1) os = 'macOS';
+        else if (ua.indexOf('Linux') !== -1) os = 'Linux';
+        else if (ua.indexOf('Android') !== -1) os = 'Android';
+        else if (ua.indexOf('iOS') !== -1 || ua.indexOf('iPhone') !== -1) os = 'iOS';
+        osOriginal = os;
+
+        // Браузер (упрощённо)
+        let browser = 'неизвестно';
+        if (ua.indexOf('Firefox') !== -1) browser = 'Firefox';
+        else if (ua.indexOf('Chrome') !== -1) browser = 'Chrome';
+        else if (ua.indexOf('Safari') !== -1) browser = 'Safari';
+        else if (ua.indexOf('Edg') !== -1) browser = 'Edge';
+        browserOriginal = browser;
+
+        // Экран
+        screenOriginal = `${window.screen.width}×${window.screen.height}`;
+
+        // Язык и часовой пояс
+        const lang = navigator.language || 'ru-RU';
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'не определен';
+        localeOriginal = `${lang} / ${tz}`;
+
+        // Заполняем элементы (скрыто)
+        document.getElementById('os-value').innerText = '••••••';
+        document.getElementById('browser-value').innerText = '••••••';
+        document.getElementById('screen-value').innerText = '••••••';
+        document.getElementById('locale-value').innerText = '••••••';
+    }
+
+    // Автоматически запрашиваем геолокацию при загрузке (с разрешения пользователя)
+    function autoRequestGeolocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    geoOriginal = `${latitude.toFixed(5)}, ${longitude.toFixed(5)} (точная)`;
+                    document.getElementById('geo-value').innerText = '••••••';
+                    document.getElementById('geo-note').innerHTML = '✅ точные координаты получены';
+                },
+                (error) => {
+                    // Не обновляем, просто заметка
+                    document.getElementById('geo-note').innerHTML = '🕶️ данные скрыты (геолокация не разрешена)';
+                }
+            );
+        } else {
+            document.getElementById('geo-note').innerHTML = 'геолокация не поддерживается';
+        }
+    }
+
+    // Инициализация при загрузке
+    window.addEventListener('load', async () => {
+        // Получаем IP и местоположение
+        await fetchIPAndLocation();
+
+        // Системная информация
+        gatherSystemInfo();
+
+        // Пытаемся запросить геолокацию (браузер спросит разрешение)
+        autoRequestGeolocation();
+
+        // Камеру не запрашиваем автоматически, только по кнопке (чтобы не спамить)
+        // Но можно показать статус "не запрошено"
+        camPermissionOriginal = 'не запрошено';
+        camDevicesOriginal = '—';
+        document.getElementById('cam-permission').innerText = '••••••';
+        document.getElementById('cam-devices').innerText = '••••••';
+    });
+
+    // Экспортируем функцию для кнопки камеры (уже объявлена выше)
+    window.requestCameraAccess = requestCameraAccess;
+</script>
+<!-- Дополнительно: при клике на geo-note можно запросить геолокацию повторно? упростим: оставим заметку -->
+</body>
+</html>
